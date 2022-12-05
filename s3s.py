@@ -15,6 +15,8 @@ A_VERSION = "0.2.3"
 
 DEBUG = False
 
+WLDFile = "G:\Splat3_WPLangDict.json";
+
 os.system("") # ANSI escape setup
 if sys.version_info[1] >= 7: # only works on python 3.7+
 	sys.stdout.reconfigure(encoding='utf-8') # note: please stop using git bash
@@ -996,10 +998,35 @@ def prepare_job_result(job, ismonitoring, isblackout, overview_data=None, prevre
 			except KeyError: # invalid special weapon - likely defaulted to '1' before it could be assigned
 				pass
 
+		with open(WLDFile, encoding="utf-8") as File:
+			WLData = json.load(File);
+
 		weapons = []
 		gave_warning = False
 		for weapon in player["weapons"]: # should always be returned in in english due to headbutt() using forcelang
-			wep_string = weapon["name"].lower().replace(" ", "_").replace("-", "_").replace(".", "").replace("'", "")
+			EngWep = WLData.get(weapon["name"]);
+			#print(f"{weapon['name']} : {EngWep}");
+
+			if (EngWep == None):
+				print(f"Is {weapon['name']} a translation of ""random""? Input (y/n) for yes / no");
+				match input().lower():
+					case "y":
+						WLData.update({weapon["name"]:"random"});
+						with open(WLDFile, "w" ,encoding="utf-8") as File:
+							json.dump(WLData, File, indent=4);
+						break;
+					case "n":
+						print(f"Input translation for {weapon['name']}:");
+						WLData.update({weapon["name"]:input()});
+						with open(WLDFile, "w" ,encoding="utf-8") as File:
+							json.dump(WLData, File, indent=4);
+						break;
+					case _:
+						print("Invalid Input... Continuing execution (This will most likely result in an error)");
+						break;
+						
+
+			wep_string = EngWep.lower().replace(" ", "_").replace("-", "_").replace(".", "").replace("'", "");
 			if wep_string == "random": # NINTENDOOOOOOO
 				wep_string = None
 			else:
@@ -1667,7 +1694,7 @@ def main():
 
 	# setup
 	#######
-	check_for_updates()
+	#check_for_updates()
 	check_statink_key()
 	set_language()
 
