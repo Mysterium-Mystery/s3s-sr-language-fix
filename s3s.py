@@ -15,7 +15,7 @@ A_VERSION = "0.2.3"
 
 DEBUG = False
 
-WLDFile = "G:\Splat3_WPLangDict.json";
+WLDFile = os.path.join(os.getcwd(), "Splat3_WPLangDict.json");
 
 os.system("") # ANSI escape setup
 if sys.version_info[1] >= 7: # only works on python 3.7+
