@@ -1,17 +1,27 @@
-s3s 🦑
-=====
+## S3HiStory ⚓
 You can find the original readme further down ↓
 
 ### Changes
-This is a fork of s3s allowing you to upload Salmon Run Jobs that you locally saved in a language other than english. All Weapons from https://stat.ink/api/v3/weapon?full=1 have been added to a big dictionary that can translate the weapon names from your language to english. This allows your Jobs to be uploaded. Some special Salmon Run Weapons are missing, but I've included a solution for that as well.
+This is a fork of s3s allowing you to upload Salmon Run Jobs that you locally saved in a language other than english. All Weapons from https://stat.ink/api/v3/weapon?full=1 have been added to a big dictionary that can translate the weapon names from your language to english. This allows your Jobs to be uploaded. Some special Salmon Run Weapons are missing, but I've included a solution for that as well. If you have a lot of folders with exported data, I've also created a batch uploader to automate uploading them all: https://github.com/Mysterium-Mystery/s3s-batch-uploader
 
 
 ### Usage
-It isn't 100% user friendly, but it should be good enough. You can either download the entire folder or just the s3s.py file and temporarily replace the original s3s.py file in your folder (Don't rename the file. For some reason that seems to break some stuff in Eli's Code). NOTE: I say "temporarily" because this version probably won't receive any updates (at least not if I don't need it anymore and no one else requests it).
-After downloading you need to open the s3s.py file in any text-editor. In line 18 you'll see 「WLDFile = "G:\Splat3_WPLangDict.json"」. Replace this file path with the path of your Splat3_WPLangDict.json file (This file is also available for download in this fork). Make sure to save your changes.
-You're basically done now. You can run s3s as normal and use the -i flag to upload data from your json files.
-There's just one more thing. As I said, some weapons are not included in that list that I used. These are "random" (Questionmark in SR) and the Grizzco Weapons. When an unknown weapon name comes up, it automatically asks you if this name is a translation of "random". Just follow the instructions and enter y/n. If you entered "no" you need to add the english translation for the name manually by entering it when you're asked to do so. You can find the english name of these weapons at the bottom of this website: https://splatoonwiki.org/wiki/Main_weapon. Please make sure to do all of this very carefully. When you make a mistake and don't know how dictionaries in json files are organized, you might have to delete your Splat3_WPLangDict.json and start from scratch with uploading your Jobs. For "random" and the "Grizzco Stringer" the german translation is already included because I encountered these two while uploading my saved Jobs.
+It isn't 100% user friendly, but it should be good enough. You can either download the entire folder or just the s3s.py file and temporarily replace the original s3s.py file in your folder (Don't rename the file. For some reason that seems to break some stuff in Eli's Code). NOTE: I say "temporarily" because this version probably won't receive any updates (at least not if I don't need it anymore and no one else requests it)
 
+After downloading you need to open the s3s.py file in any text-editor. In line 18 you'll see 「WLDFile = "G:\Splat3_WPLangDict.json"」. Replace this file path with the path of your Splat3_WPLangDict.json file (This file is also available for download in this fork). Make sure to save your changes
+You're basically done now. You can run s3s as normal and use the -i flag to upload data from your json files
+
+There's just one more thing. As I said, some weapons are not included in that list that I used. These are "random" (Questionmark in SR) and the Grizzco Weapons. When an unknown weapon name comes up, it automatically asks you if this name is a translation of "random". Just follow the instructions and enter y/n. If you entered "n" you need to add the english translation for the name manually by entering it when you're asked to do so. You can find the english name of these weapons at the bottom of this website: https://splatoonwiki.org/wiki/Main_weapon
+Please make sure to do all of this very carefully. When you make a mistake and don't know how dictionaries in json files are organized, you might have to delete your Splat3_WPLangDict.json and start from scratch with uploading your Jobs
+For "random" and the "Grizzco Stringer" the german translation is already included because I encountered these two while uploading my saved Jobs
+
+Once again, if you have a lot of folders with data exported from s3s, here is my batch uploader to simplify the upload process: https://github.com/Mysterium-Mystery/s3s-batch-uploader
+
+
+I have obviously tested everything since I used these tools myself, but I can't guarantee that there won't be any issues. If you encounter any unexpected behaviour, feel free to contact me
+
+
+## The original readme continues here ↓
 
 **s3s** is a script that uploads _Splatoon 3_ battle data from the SplatNet 3 service (part of the Nintendo Switch Online app) to [stat.ink](https://stat.ink/), a site for recording, visualizing, and aggregating statistics from the *Splatoon* series of games.
 
