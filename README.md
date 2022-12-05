@@ -6,13 +6,13 @@ This is a fork of s3s allowing you to upload Salmon Run Jobs that you locally sa
 
 
 ### Usage
-It isn't 100% user friendly, but it should be good enough. You can either download the entire folder or just the s3s.py file and temporarily replace the original s3s.py file in your folder (Don't rename the file. For some reason that seems to break some stuff in Eli's Code). NOTE: I say "temporarily" because this version probably won't receive any updates (at least not if I don't need it anymore and no one else requests it)
+It isn't 100% user friendly, but it should be good enough. I recommend downloading the entire folder and copying your "config.txt" file into this new folder
 
-After downloading you need to open the s3s.py file in any text-editor. In line 18 you'll see 「WLDFile = "G:\Splat3_WPLangDict.json"」. Replace this file path with the path of your Splat3_WPLangDict.json file (This file is also available for download in this fork). Make sure to save your changes. You're basically done now. You can run s3s as normal and use the -i flag to upload data from your json files
+After downloading, you can run s3s as normal and use the -i flag to upload data from your json files
 
 There's just one more thing. As I said, some weapons are not included in that list that I used. These are "random" (Probably "?" in SR) and the Grizzco Weapons. When an unknown weapon name comes up, it automatically asks you if this name is a translation of "random". Just follow the instructions and enter y/n. If you entered "n" you need to add the english translation for the name manually by entering it when you're asked to do so. You can find the english name of these weapons at the bottom of this website: https://splatoonwiki.org/wiki/Main_weapon
 
-Please make sure to do all of this very carefully. When you make a mistake and don't know how dictionaries in json files are organized, you might have to delete your Splat3_WPLangDict.json and start from scratch with uploading your Jobs
+Please make sure to do all of this very carefully. When you make a mistake and don't know how dictionaries in json files are organized, you might have to delete your Splat3_WPLangDict.json file and start from scratch with uploading your Jobs
 
 For "random" and the "Grizzco Stringer" the german translation is already included because I encountered these two while uploading my saved Jobs
 
