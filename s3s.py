@@ -16,6 +16,8 @@ A_VERSION = "0.2.3"
 DEBUG = False
 
 WLDFile = os.path.join(os.getcwd(), "Splat3_WPLangDict.json");
+print(WLDFile);
+input();
 
 os.system("") # ANSI escape setup
 if sys.version_info[1] >= 7: # only works on python 3.7+
@@ -1009,22 +1011,19 @@ def prepare_job_result(job, ismonitoring, isblackout, overview_data=None, prevre
 
 			if (EngWep == None):
 				print(f"Is {weapon['name']} a translation of ""random""? Input (y/n) for yes / no");
-				match input().lower():
-					case "y":
-						WLData.update({weapon["name"]:"random"});
-						with open(WLDFile, "w" ,encoding="utf-8") as File:
-							json.dump(WLData, File, indent=4);
-						break;
-					case "n":
-						print(f"Input translation for {weapon['name']}:");
-						WLData.update({weapon["name"]:input()});
-						with open(WLDFile, "w" ,encoding="utf-8") as File:
-							json.dump(WLData, File, indent=4);
-						break;
-					case _:
-						print("Invalid Input... Continuing execution (This will most likely result in an error)");
-						break;
-						
+				Inp = input().lower();
+
+				if (Inp == "y"):
+					WLData.update({weapon["name"]:"random"});
+					with open(WLDFile, "w" ,encoding="utf-8") as File:
+						json.dump(WLData, File, indent=4);
+				elif (Inp == "n"):
+					print(f"Input translation for {weapon['name']}:");
+					WLData.update({weapon["name"]:input()});
+					with open(WLDFile, "w" ,encoding="utf-8") as File:
+						json.dump(WLData, File, indent=4);
+				else:
+					print("Invalid Input... Continuing execution (This will most likely result in an error)");
 
 			wep_string = EngWep.lower().replace(" ", "_").replace("-", "_").replace(".", "").replace("'", "");
 			if wep_string == "random": # NINTENDOOOOOOO
