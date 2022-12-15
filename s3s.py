@@ -1014,6 +1014,9 @@ def prepare_job_result(job, ismonitoring, isblackout, overview_data=None, prevre
 			except KeyError: # invalid special weapon - likely defaulted to '1' before it could be assigned
 				pass
 
+		with open(WLDFile, encoding="utf-8") as File:
+			WLData = json.load(File);
+
 		weapons = []
 		gave_warning = False
 		for weapon in player["weapons"]: # should always be returned in in english due to headbutt() using forcelang
