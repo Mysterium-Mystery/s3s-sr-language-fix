@@ -11,13 +11,11 @@ import msgpack
 from packaging import version
 import iksm, utils
 
-A_VERSION = "0.2.3"
+A_VERSION = "0.2.6"
 
 DEBUG = False
 
 WLDFile = os.path.join(os.getcwd(), "Splat3_WPLangDict.json");
-print(WLDFile);
-input();
 
 os.system("") # ANSI escape setup
 if sys.version_info[1] >= 7: # only works on python 3.7+
@@ -220,16 +218,18 @@ def fetch_json(which, separate=False, exportall=False, specific=False, numbers_o
 	parent_files = []
 
 	queries = []
-	if which == "both" or which == "ink":
+	if which in ("both", "ink"):
 		if specific in (True, "regular"):
 			queries.append("RegularBattleHistoriesQuery")
 		if specific in (True, "anarchy"):
 			queries.append("BankaraBattleHistoriesQuery")
 		if specific in (True, "x"):
 			queries.append("XBattleHistoriesQuery")
+		# if specific in (True, "league"):
+			# queries.append("LeagueBattleHistoriesQuery") # LEAGUE TODO & check query name
 		if specific in (True, "private") and not utils.custom_key_exists("ignore_private", CONFIG_DATA):
 			queries.append("PrivateBattleHistoriesQuery")
-		else:
+		if not specific: # False
 			if DEBUG:
 				print("* not specific, just looking at latest")
 			queries.append("LatestBattleHistoriesQuery")
@@ -348,8 +348,7 @@ def fetch_detailed_result(is_vs_history, history_id, swim):
 def update_salmon_profile():
 	''' Updates stat.ink Salmon Run stats/profile.'''
 
-	pass # SR TODO
-
+	pass
 	# prefetch_checks()
 
 	# results_list = requests.post(utils.GRAPHQL_URL,
@@ -357,16 +356,17 @@ def update_salmon_profile():
 	# 	headers=headbutt(forcelang='en-US'),
 	# 	cookies=dict(_gtoken=GTOKEN))
 	# data = json.loads(results_list.text)
-	# profile = data["summary"]
+	# profile = data["..."]
 
-	# payload = {
-	# 	"work_count":        profile["card"]["job_num"],
-	# 	"total_golden_eggs": profile["card"]["golden_ikura_total"],
-	# 	"total_eggs":        profile["card"]["ikura_total"],
-	# 	"total_rescued":     profile["card"]["help_total"],
-	# 	"total_point":       profile["card"]["kuma_point_total"]
-	# 	# other new things - total fish scales, kings defeated, current & total points?
-	# }
+	# payload:
+	# current points
+	# jobs (shifts) worked
+	# golden eggs collected
+	# power eggs colleted
+	# king salmonids defeated
+	# crew members rescued
+	# total points
+	# current number of scales
 
 	# url = "https://stat.ink/api/v2/salmon-stats"
 	# auth = {'Authorization': f'Bearer {API_KEY}'}
@@ -858,35 +858,49 @@ def prepare_job_result(job, ismonitoring, isblackout, overview_data=None, prevre
 		payload["title_after"]     = utils.b64d(job["afterGrade"]["id"])
 		payload["title_exp_after"] = job["afterGradePoint"]
 
-		# we're never certain of points gained - could be 20, but also 0 if playing w/ different titled friends
+		# never sure of points gained unless first job of rot - wave 3 clear is usu. +20, but 0 if playing w/ diff-titled friends
 		if job.get("previousHistoryDetail") != None:
 			prev_job_id = job["previousHistoryDetail"]["id"]
 
 			if overview_data: # passed in a file, so no web request needed
 				if prevresult:
-					try:
-						payload["title_before"] = utils.b64d(prevresult["coopHistoryDetail"]["afterGrade"]["id"])
-						payload["title_exp_before"] = prevresult["coopHistoryDetail"]["afterGradePoint"]
-					except KeyError:
-						pass # private job or disconnect
+					# compare stage - if different, this is the first job of a rotation, where you start at 40
+					if job["coopStage"]["id"] != prevresult["coopHistoryDetail"]["coopStage"]["id"]:
+						payload["title_before"]     = payload["title_after"] # can't go up or down from just one job
+						payload["title_exp_before"] = 40
+					else:
+						try:
+							payload["title_before"]     = utils.b64d(prevresult["coopHistoryDetail"]["afterGrade"]["id"])
+							payload["title_exp_before"] = prevresult["coopHistoryDetail"]["afterGradePoint"]
+						except KeyError: # prev job was private or disconnect
+							pass
 			else:
 				prev_job_post = requests.post(utils.GRAPHQL_URL,
 					data=utils.gen_graphql_body(utils.translate_rid["CoopHistoryDetailQuery"], "coopHistoryDetailId", prev_job_id),
 					headers=headbutt(forcelang='en-US'),
 					cookies=dict(_gtoken=GTOKEN))
-				prev_job = json.loads(prev_job_post.text)
-
 				try:
-					payload["title_before"] = utils.b64d(prev_job["data"]["coopHistoryDetail"]["afterGrade"]["id"])
-					payload["title_exp_before"] = prev_job["data"]["coopHistoryDetail"]["afterGradePoint"]
-				except:
-					pass # private job or disconnect, or the json was invalid (expired job) or something
+					prev_job = json.loads(prev_job_post.text)
 
-	geggs = job["myResult"]["goldenDeliverCount"]
+					# do stage comparison again
+					if job["coopStage"]["id"] != prev_job["data"]["coopHistoryDetail"]["coopStage"]["id"]:
+						payload["title_before"]     = payload["title_after"]
+						payload["title_exp_before"] = 40
+					else:
+						try:
+							payload["title_before"] = utils.b64d(prev_job["data"]["coopHistoryDetail"]["afterGrade"]["id"])
+							payload["title_exp_before"] = prev_job["data"]["coopHistoryDetail"]["afterGradePoint"]
+						except KeyError: # private or disconnect, or the json was invalid (expired job >50 ago) or something
+							pass
+				except json.decoder.JSONDecodeError:
+					pass
+
+	geggs = 0
 	peggs = job["myResult"]["deliverCount"]
 	for player in job["memberResults"]:
-		geggs += player["goldenDeliverCount"]
 		peggs += player["deliverCount"]
+	for wave in job["waveResults"]:
+		geggs += wave["teamDeliverCount"] if wave["teamDeliverCount"] != None else 0
 	payload["golden_eggs"] = geggs
 	payload["power_eggs"]  = peggs
 
@@ -1000,9 +1014,6 @@ def prepare_job_result(job, ismonitoring, isblackout, overview_data=None, prevre
 			except KeyError: # invalid special weapon - likely defaulted to '1' before it could be assigned
 				pass
 
-		with open(WLDFile, encoding="utf-8") as File:
-			WLData = json.load(File);
-
 		weapons = []
 		gave_warning = False
 		for weapon in player["weapons"]: # should always be returned in in english due to headbutt() using forcelang
@@ -1035,7 +1046,7 @@ def prepare_job_result(job, ismonitoring, isblackout, overview_data=None, prevre
 					wep_string = None
 					if not gave_warning:
 						gave_warning = True
-						print("(!) Proceeding without weapon names. See https://github.com/frozenpandaman/s3s/issues/80 for more information.")
+						print("(!) Proceeding without weapon names. See https://github.com/frozenpandaman/s3s/issues/95 to fix this.")
 
 			weapons.append(wep_string)
 		player_info["weapons"] = weapons
@@ -1073,8 +1084,7 @@ def prepare_job_result(job, ismonitoring, isblackout, overview_data=None, prevre
 
 	payload["start_at"] = utils.epoch_time(job["playedTime"])
 
-	# payload["big_run"] = "yes" if job_rule == "BIG_RUN" else "no"
-	payload["big_run"] = "no" # TODO once stat.ink supports it
+	payload["big_run"] = "yes" if job_rule == "BIG_RUN" else "no"
 
 	if isblackout:
 		# fix payload
@@ -1330,7 +1340,7 @@ def check_if_missing(which, isblackout, istestrun, skipprefetch):
 		urls.append("https://stat.ink/api/v3/s3s/uuid-list") # max 200 entries
 	else:
 		urls.append(None)
-	if which == "both" or which == "salmon":
+	if which in ("both", "salmon"):
 		urls.append("https://stat.ink/api/v3/salmon/uuid-list")
 	else:
 		urls.append(None)
@@ -1386,6 +1396,7 @@ def check_if_missing(which, isblackout, istestrun, skipprefetch):
 
 		noun = "jobs" # for second run through the loop
 		which = "salmon"
+
 
 def check_for_new_results(which, cached_battles, cached_jobs, battle_wins, battle_losses, battle_draws, splatfest_wins, splatfest_losses, splatfest_draws, mirror_matches, job_successes, job_failures, isblackout, istestrun):
 	'''Helper function for monitor_battles(), called every N seconds or when exiting.'''
